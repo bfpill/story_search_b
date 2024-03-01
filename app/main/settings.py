@@ -1,0 +1,46 @@
+import base64
+import json
+from openai import OpenAI
+from pydantic import BaseModel, Field, ConfigDict
+from dotenv import load_dotenv
+import os
+from pydantic_settings import BaseSettings
+
+import firebase_admin
+from firebase_admin import credentials, auth
+
+load_dotenv()
+
+
+class Settings(BaseSettings):
+  secret_key: str = "SECRET_KEY NOT SET"
+  openai_api_key: str = "OPENAI_API_KEY NOT SET"
+  email_pass: str = "EMAIL_PASS NOT SET"
+  email_user: str = "EMAIL_USER NOT SET"
+  firebase_credentials_base64: str = "FIREBASE CRED NOT SET"
+  master_password: str = "MASTER PASS NOT SET"
+
+  production: bool = False
+  logger_file: str = 'surv.log'
+  temp_files: str = '/tmp/surv/tmp'
+
+  class Config:
+    env_file = '.env'
+    env_file_encoding = 'utf-8'
+
+settings = Settings()
+client = OpenAI(api_key=settings.openai_api_key)
+
+
+firebase_credentials_json = base64.b64decode(settings.firebase_credentials_base64)
+firebase_credentials = json.loads(firebase_credentials_json)
+
+cred = credentials.Certificate(firebase_credentials)
+firebase_admin.initialize_app(cred)
+
+# def getFireabseApp():
+#   return firebase_
+
+def getOpenai():
+  return client
+
