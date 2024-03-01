@@ -4,3 +4,8 @@ from uuid import uuid4
 
 class Base(BaseModel):
   empty: str
+  
+  
+class GenerateBookRequest(BaseModel):
+  search: str
+  userId: str

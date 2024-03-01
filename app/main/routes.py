@@ -15,4 +15,4 @@ def test(req: Base):
   #   logger.error(f"Error sending email: {e}")
   #   raise HTTPException(detail=str(e),
   #              status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+  
