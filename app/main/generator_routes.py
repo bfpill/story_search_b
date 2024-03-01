@@ -8,47 +8,50 @@ from logging import getLogger
 from app.main.types import *
 from app.main.data_handlers import *
 
-
 router = APIRouter()
 client = OpenAI()
 logger = getLogger()
-  
 
-@router.post('/api/persona', tags=["persona"])
-def generate_persona_from_responses(req: Base, content = "full", curr_persona={}):
-  
-  summaries = []
-
-  prompt = '''
-    Task Overview:
-
-    You will be provided with a dataset containing responses to a customer experience survey. Your task is to analyze the survey responses, identify common themes and characteristics among the participants, and synthesize this information into a single, representative user persona. This persona should encapsulate the shared attributes, needs, and behaviors of the survey respondents.
-    Read the data and then follow the instructions.
-  '''
-            
-  completion = client.chat.completions.create(
-    response_format={ "type": "json_object" },
-    messages=[{ 
-      "role": "system", 
-      "content": prompt 
-    }], 
-    model="gpt-4-0125-preview",
-  )
-
-  persona_json = completion.choices[0].message.content
-  persona = json.loads(persona_json)
-  
-@router.get('/book', tags=["book"])
+@router.post('/book', tags=["book"])
 def generate_book_request(req: GenerateBookRequest):
-  prompt = '''
-    Task Overview:
+  json_structure = {
+        "title": "Funny Title",
+        "pages": [
+            {
+                "pageNum": 1,
+                "text": "Page 1 Text",
+                "images": [
+                    "Image One Title",
+                    "Image Two Title",
+                ]
+            },
+            {
+                "pageNum": 2,
+                "text": "Page 2 Text",
+                "images": [
+                    "Image One Title",
+                    "Image Two Title",
+                ]
+            },
+        ]
+    }
+ 
+  prompt = f'''
+    Create a short story based on factual information about "{req.search_query}".
+    The story should be engaging, with fictional 
+    characters and a narrative that weaves in the factual information seamlessly.
 
-    You will be provided with a dataset containing responses to a customer experience survey. 
-    Your task is to analyze the survey responses, identify common themes and characteristics among the participants, 
-    and synthesize this information into a single, representative user persona. This persona should encapsulate the 
-    shared attributes, needs, and behaviors of the survey respondents.
-    Read the data and then follow the instructions.
-  '''
+    Format the story according to the following JSON structure, where each "page" 
+    represents a page of the story, and "text" contains the content of each section.
+    Include fictional images by specifying their hypothetical title,
+    but ensure they relate to the content of the story:
+    
+    {str(json_structure)}
+    Add more pages as needed, following the pattern above.
+    
+    The story should be roughly 100 words total, and 10 pages long. 
+    
+    '''
             
   completion = client.chat.completions.create(
     response_format={ "type": "json_object" },
@@ -58,9 +61,12 @@ def generate_book_request(req: GenerateBookRequest):
     }], 
     model="gpt-4-0125-preview",
   )
-
+  
   book_json = completion.choices[0].message.content
   book = json.loads(book_json)
+  print(book)
+  
+  print("finished book")
   
   return book 
 

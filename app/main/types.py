@@ -7,5 +7,5 @@ class Base(BaseModel):
   
   
 class GenerateBookRequest(BaseModel):
-  search: str
-  userId: str
+  search_query: str
+  user_id: str
