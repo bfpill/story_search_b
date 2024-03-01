@@ -59,20 +59,20 @@ async def firebase_auth_middleware(request: Request, call_next):
   # if request.url.path in NO_AUTH_NEEDED or request.method == "OPTIONS":
         # return await call_next(request)
 
-  try:
-      authorization: str = request.headers.get("Authorization")
-      if not authorization:
-          raise HTTPException(status_code=401, detail="Authorization header is missing")
+  # try:
+  #     authorization: str = request.headers.get("Authorization")
+  #     if not authorization:
+  #         raise HTTPException(status_code=401, detail="Authorization header is missing")
 
-      scheme, token = authorization.split()
-      if scheme.lower() != 'bearer':
-          raise HTTPException(status_code=401, detail="Invalid authentication scheme")
-      if token != settings.master_password:
-          decoded_token = auth.verify_id_token(token)
-          request.state.user = decoded_token
+  #     scheme, token = authorization.split()
+  #     if scheme.lower() != 'bearer':
+  #         raise HTTPException(status_code=401, detail="Invalid authentication scheme")
+  #     if token != settings.master_password:
+  #         decoded_token = auth.verify_id_token(token)
+  #         request.state.user = decoded_token
 
-  except Exception as e:
-      raise HTTPException(status_code=403, detail=f"Invalid authentication token: {str(e)}")
+  # except Exception as e:
+  #     raise HTTPException(status_code=403, detail=f"Invalid authentication token: {str(e)}")
 
   return await call_next(request)
 
