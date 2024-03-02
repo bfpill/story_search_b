@@ -47,6 +47,11 @@ def set_book(user_id: str, book_id: str, book: BookData):
     
     books_ref = db.reference(f'/users/{user_id}/books')
     books_ref.child(book_id).set(book.model_dump())
+
+    # Add books to correct category in books 
+    books_ref = db.reference(f'/books/{book.category}')
+    books_ref.child(book_id).set(book.model_dump())
+    
     return True
 
   except Exception as e:
@@ -89,6 +94,17 @@ def get_user_id(user_id: int):
     raise HTTPException(detail=str(e),
                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
   
-# email -> user_id 
-  
-# create user with email and username and new id given
+
+@router.get('/api/get_all_books', tags=["Book"])
+def get_all_books():
+  try:
+    books_ref = db.reference(f'/books')
+    books = books_ref.get()
+    if books:
+      return {"books": books}
+    else:
+      raise HTTPException(status_code=404, detail="Books not found")
+  except Exception as e:
+    logger.error(f"Error retrieving books: {e}")
+    raise HTTPException(detail=str(e),
+               status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
