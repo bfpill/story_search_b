@@ -12,20 +12,23 @@ settings = Settings()
 
 # def does_user_exist(email: str):
 
-@router.get('/api/get_book/{email}/{book_id}', tags=["Book", "User"])
-def get_book(email: str, book_id: int):
+@router.get('/api/{email}/{book_id}', tags=["Book", "User"])
+def get_book(email: str, book_id: str):
 
-  encoded_email = email.replace('.', ',')
+  email = email.replace('.', ',')
+  print(email, book_id)
 
   try:
-    user_books_doc_ref = db.collection(f'users/{encoded_email}/books').document(book_id)
+    user_books_doc_ref = db.collection(f'users/max@v3rv,com/books').document(str(book_id))
+    print(user_books_doc_ref)
+   
     book_doc = user_books_doc_ref.get()
-
+    print(book_doc.to_dict())
     if book_doc.exists:
         book_data = book_doc.to_dict()
         return book_data
     else:
-        raise HTTPException(status_code=404, detail="Book not found")
+      raise HTTPException(status_code=404, detail="Book not found")
 
   except Exception as e:
       logger.error(f"Error retrieving user books: {e}")
@@ -90,20 +93,22 @@ def get_all_books():
                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
   
   
-@router.get('/api/get_all_user_books/{email}', tags=["Book"])
+@router.post('/api/user_books/{email}', tags=["Book"])
 def get_all_user_books(email: str):
-  try:
-    encoded_email = email.replace('.', ',')
-    user_books_ref = db.collection(f'users/{encoded_email}/books')
-    
-    user_books_stream = user_books_ref.stream()
-    
-    user_books = [doc.to_dict() for doc in user_books_stream]
-    
-    if user_books:
-        return user_books
-    else:
-        raise HTTPException(status_code=404, detail="Books not found")
-  except Exception as e:
-    logger.error(f"Error retrieving user books: {e}")
-    raise HTTPException(status_code=500, detail=str(e))
+  print("cheese")
+  # try:
+  encoded_email = email.replace('.', ',')
+  print(encoded_email, "EMAIL< FUK")
+  user_books_ref = db.collection(f'users/{encoded_email}/books')
+  
+  user_books_stream = user_books_ref.stream()
+  
+  user_books = [doc.to_dict() for doc in user_books_stream]
+  
+  if user_books:
+      return user_books
+    # else:
+    #     raise HTTPException(status_code=404, detail="Books not found")
+  # except Exception as e:
+  #   logger.error(f"Error retrieving user books: {e}")
+  #   raise HTTPException(status_code=500, detail=str(e))
