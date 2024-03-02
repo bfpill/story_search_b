@@ -16,10 +16,6 @@ from firebase_admin import auth
 def get_app() -> FastAPI:
   app = FastAPI(
     description="Surv Backend", version="0.0.1",
-    # TODO: get servers from passed in cmd line / env var
-    # servers=[
-    #   {"url": "https://verveguy.ngrok.app", "description": "Personal laptop"},
-    # ]
   )
   setup_rich_logger()
   return app

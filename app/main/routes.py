@@ -1,3 +1,4 @@
+from collections import defaultdict
 from fastapi import APIRouter, Depends, status, HTTPException, Header
 from logging import getLogger
 from app.main.settings import Settings
@@ -60,6 +61,21 @@ def set_book(req: SetBookReq, email: str, book_id: str):
     raise HTTPException(detail=str(e),
                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+#create a new user
+@router.put('/api/user/{email}', tags=["User"])
+def update_user(req: UpdateUserReq, email: str):
+
+  email = email.replace(".", ",")
+
+  try:
+    email_id_ref = db.document(f'users/{email}')
+    email_id_ref.set(req.new_data)
+
+    return True
+  except Exception as e:
+    logger.error(f"Error creating user: {e}")
+    raise HTTPException(detail=str(e),
+               status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #create a new user
 @router.post('/api/create_user/{email}', tags=["User"])
@@ -81,12 +97,19 @@ def create_user(email: str):
 @router.get('/api/get_all_books', tags=["Book"])
 def get_all_books():
   try:
-    books_ref = db.reference(f'/books')
-    books = books_ref.get()
-    if books:
-      return {"books": books}
-    else:
-      raise HTTPException(status_code=404, detail="Books not found")
+    books_by_category = defaultdict(list) 
+    books_ref = db.collection_group('books')
+    docs = books_ref.stream()
+    
+    for doc in docs:
+      data = doc.to_dict() 
+      category = data.get('category')
+      if category: 
+        books_by_category[category].append(data)
+
+    print(books_by_category)
+    return books_by_category
+
   except Exception as e:
     logger.error(f"Error retrieving books: {e}")
     raise HTTPException(detail=str(e),
@@ -99,6 +122,7 @@ def get_all_user_books(email: str):
   # try:
   encoded_email = email.replace('.', ',')
   print(encoded_email, "EMAIL< FUK")
+  
   user_books_ref = db.collection(f'users/{encoded_email}/books')
   
   user_books_stream = user_books_ref.stream()

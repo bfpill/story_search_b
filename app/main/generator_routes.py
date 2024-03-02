@@ -156,7 +156,7 @@ async def get_cached_backgrounds(query):
   print("EMB", emb["matches"][0]['score'])
 
   match = emb["matches"][0]
-  if match and match["score"] > 0.75:
+  if match and match["score"] > 0.81:
     if "metadata" in match:
       print("GOT EXISTING IMAGE")
       left_url, right_url = match["metadata"]["left_id"], match["metadata"]["right_id"]

@@ -15,6 +15,8 @@ class GenerateBookRequest(BaseModel):
 class GenerateSearchOptionsReq(BaseModel):
   search_query: str
 
+class UpdateUserReq(BaseModel):
+  new_data: Any
 
 class CreateUserRequest(BaseModel):
   username: str
