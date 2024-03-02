@@ -1,8 +1,9 @@
 import json
 from typing import Union
 from fastapi import APIRouter, status, HTTPException 
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
 from logging import getLogger
+from app.main import settings
 from app.main.image_routes import generate_background_image 
 import asyncio
 from PIL import Image
@@ -18,10 +19,40 @@ from app.main.utils import get_random_pastel_color
 from app.main.vdb_handlers import query_by_search, vdb_store_image
 
 router = APIRouter()
-client = OpenAI()
+client = AsyncOpenAI()
 logger = getLogger()
 
-def generate_book_json(query): 
+@router.post('/search', tags=["book"])
+async def generate_search_options(req: GenerateSearchOptionsReq): 
+  json_structure = {"titles": [
+    "Possible Title 1",
+    "Possible Title 2",
+    "Possible Title 3",
+    ]}
+ 
+  prompt = f'''
+    Create 3 possible titles for a childrens book about {req.search_query}".
+    Ouput the possible titles as a JSON array of strings. \n
+    {str(json_structure)}
+    '''
+            
+  completion = await client.chat.completions.create(
+    response_format={ "type": "json_object" },
+    messages=[{ 
+      "role": "system", 
+      "content": prompt 
+    }], 
+    model="gpt-4-0125-preview",
+  )
+  
+  titles_json = completion.choices[0].message.content
+  titles = json.loads(titles_json)
+  
+  print("titles", titles)
+  
+  return titles 
+
+async def generate_book_json(query): 
   json_structure = {
         "title": "Funny Title",
         "pages": [
@@ -64,7 +95,7 @@ def generate_book_json(query):
     
     '''
             
-  completion = client.chat.completions.create(
+  completion = await client.chat.completions.create(
     response_format={ "type": "json_object" },
     messages=[{ 
       "role": "system", 
@@ -75,7 +106,10 @@ def generate_book_json(query):
   
   book_json = completion.choices[0].message.content
   book = json.loads(book_json)
+
   book["color"] = get_random_pastel_color()
+  book["complementary_color"] = get_random_pastel_color()
+
   print(book)
   
   print("finished book")
@@ -84,9 +118,8 @@ def generate_book_json(query):
 
 @router.post('/book', tags=["book"])
 async def generate_book_request(req: GenerateBookRequest):
-    
   print("generating a book")
-  book_json = generate_book_json(req.search_query)
+  book_json = await generate_book_json(req.search_query)
 
   # Add something here to get the books general color theme
   images = []
@@ -94,10 +127,10 @@ async def generate_book_request(req: GenerateBookRequest):
     if i % 2 == 0: 
       left_image_url, right_image_url = "", ""
 
-      left_image_url, right_image_url = get_cached_backgrounds(page["background_image"])
+      left_image_url, right_image_url = await get_cached_backgrounds(page["background_image"])
 
       if not left_image_url and not right_image_url: 
-        image_url = generate_background_image(page["background_image"], book_json["color"])
+        image_url = await generate_background_image(page["background_image"], book_json["color"])
         left_image_data, right_image_data = split_image(image_url)
 
         left_id, right_id = str(uuid4()), str(uuid4())
@@ -105,7 +138,7 @@ async def generate_book_request(req: GenerateBookRequest):
         left_image_url = store_image(left_id, left_image_data)
         right_image_url = store_image(right_id, right_image_data)
 
-        vdb_store_image(page["background_image"], left_image_url, right_image_url)
+        await vdb_store_image(page["background_image"], left_image_url, right_image_url)
       
       images.append(left_image_url)
       images.append(right_image_url)
@@ -116,47 +149,52 @@ async def generate_book_request(req: GenerateBookRequest):
     
   return book_json
 
-def get_cached_backgrounds(query): 
-  emb = query_by_search(query)
-  if emb["matches"] and emb["matches"][0]["score"] > 0.9:
-    if "metadata" in emb:
-      left_url, right_url = emb["metadata"]["left_url"], emb["metadata"]["right_url"]
+async def get_cached_backgrounds(query): 
+  emb = await query_by_search(query)
+
+  print("EMB", emb["matches"][0]['score'])
+
+  match = emb["matches"][0]
+  if match and match["score"] > 0.75:
+    if "metadata" in match:
+      print("GOT EXISTING IMAGE")
+      left_url, right_url = match["metadata"]["left_id"], match["metadata"]["right_id"]
       return left_url, right_url
 
   return None, None
 
 
 def split_image(url):
-    response = requests.get(url)
-    original_image = Image.open(BytesIO(response.content))
+  response = requests.get(url)
+  original_image = Image.open(BytesIO(response.content))
 
-    width, height = original_image.size
-    mid = width // 2
+  width, height = original_image.size
+  mid = width // 2
 
-    # New dimensions based on 8:6 ratio
-    target_width = (height * 8) // 6
+  # New dimensions based on 8:6 ratio
+  target_width = (height * 8) // 6
 
-    if target_width > width:
-        target_width = width
-        target_height = (target_width * 6) // 8
-    else:
-        target_height = height
+  if target_width > width:
+      target_width = width
+      target_height = (target_width * 6) // 8
+  else:
+      target_height = height
 
-    left_edge = (width - target_width) // 2
-    top_edge = (height - target_height) // 2
+  left_edge = (width - target_width) // 2
+  top_edge = (height - target_height) // 2
 
-    cropped_image = original_image.crop((left_edge, top_edge, left_edge + target_width, top_edge + target_height))
+  cropped_image = original_image.crop((left_edge, top_edge, left_edge + target_width, top_edge + target_height))
 
-    mid_point = target_width // 2
-    left_half = cropped_image.crop((0, 0, mid_point, height))
-    right_half = cropped_image.crop((mid_point, 0, target_width, height))
+  mid_point = target_width // 2
+  left_half = cropped_image.crop((0, 0, mid_point, height))
+  right_half = cropped_image.crop((mid_point, 0, target_width, height))
 
-    left_bytes = BytesIO()
-    right_bytes = BytesIO()
-    left_half.save(left_bytes, format=original_image.format)
-    right_half.save(right_bytes, format=original_image.format)
+  left_bytes = BytesIO()
+  right_bytes = BytesIO()
+  left_half.save(left_bytes, format=original_image.format)
+  right_half.save(right_bytes, format=original_image.format)
 
-    return left_bytes.getvalue(), right_bytes.getvalue()
+  return left_bytes.getvalue(), right_bytes.getvalue()
 
     
 

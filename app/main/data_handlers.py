@@ -3,7 +3,7 @@ import json
 from logging import getLogger
 import os
 import uuid
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
 from pinecone import ServerlessSpec
 from app.main.types import *
 
@@ -11,7 +11,7 @@ from firebase_admin import firestore
 
 db = firestore.client()
 logger = getLogger()
-client = OpenAI()
+client = AsyncOpenAI()
 
 response_index_dims = 1536
 form_index_dims= 1

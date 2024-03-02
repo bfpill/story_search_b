@@ -1,7 +1,7 @@
 import random
 
 def get_random_pastel_color():
-    # List of standard HTML pastel colors based on common definitions and naming conventions.
+
     pastel_colors = [
         "LightPink", "Pink", "LightCoral", "LavenderBlush", "MistyRose",
         "LightSalmon", "Salmon", "LightSkyBlue", "PowderBlue", "LightBlue",

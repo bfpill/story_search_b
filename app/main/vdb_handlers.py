@@ -2,17 +2,19 @@
 from logging import getLogger
 from typing import List
 from uuid import uuid4
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
+from app.main import settings
 from app.main.settings import getPc
 from pinecone import ServerlessSpec
-client = OpenAI()
+
+client = AsyncOpenAI()
 
 backgrounds_index_name = "backgrounds"
 pc = getPc()
 logger = getLogger()
 
-def vdb_store_image(imageTitle, left_url, right_url):
-  vector = create_vector(imageTitle)
+async def vdb_store_image(imageTitle, left_url, right_url):
+  vector = await create_vector(imageTitle)
   print("got vector")
 
   store_embed(backgrounds_index_name, str(uuid4()), left_url=left_url, right_url=right_url, vector=vector)
@@ -28,8 +30,8 @@ def get_embedding(index_name: str, emb_id: str, namespace: str = ""):
     namespace=namespace
   ) 
 
-def query_by_search(query: str): 
-  query_vector = create_vector(query)
+async def query_by_search(query: str): 
+  query_vector = await create_vector(query)
   index = pc.Index(backgrounds_index_name)
   
   print("querying embedding") 
@@ -41,9 +43,9 @@ def query_by_search(query: str):
     include_metadata=True
   )
     
-def create_vector(data): 
+async def create_vector(data): 
   if data: 
-    response = client.embeddings.create(
+    response = await client.embeddings.create(
       input = [data], 
       model = "text-embedding-ada-002"
     )

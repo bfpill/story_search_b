@@ -1,6 +1,6 @@
 import base64
 import json
-from openai import OpenAI
+from openai import AsyncOpenAI
 from pydantic import BaseModel, Field, ConfigDict
 from dotenv import load_dotenv
 import os
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     env_file_encoding = 'utf-8'
 
 settings = Settings()
-client = OpenAI(api_key=settings.openai_api_key)
+client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 pc_key = settings.pinecone_api_key
 

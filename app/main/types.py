@@ -9,6 +9,9 @@ class Base(BaseModel):
 class GenerateBookRequest(BaseModel):
   search_query: str
   user_id: str
+  
+class GenerateSearchOptionsReq(BaseModel):
+  search_query: str
 
 
 class CreateUserRequest(BaseModel):
@@ -30,7 +33,7 @@ class BookData(BaseModel):
   
 class GenerateBackgroundImageReq(GenerateBookRequest): 
   color: str
-
+  
 
 class User(BaseModel):
   email: str

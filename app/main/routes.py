@@ -52,6 +52,7 @@ def set_book(email: str, book_id: str, book: BookData):
     books_ref = db.reference(f'/books/{book.category}')
     books_ref.child(book_id).set(book.model_dump())
     
+    print("WROTE TO BOOK USER")
     return True
 
   except Exception as e:

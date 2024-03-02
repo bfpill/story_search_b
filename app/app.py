@@ -54,8 +54,8 @@ app.include_router(image_routes.router)
 settings = Settings()
 
 # user_info = request.state.user
-@app.middleware("http")
-async def firebase_auth_middleware(request: Request, call_next):
+# @app.middleware("http")
+# async def firebase_auth_middleware(request: Request, call_next):
 
   # if request.url.path in NO_AUTH_NEEDED or request.method == "OPTIONS":
         # return await call_next(request)
@@ -75,7 +75,7 @@ async def firebase_auth_middleware(request: Request, call_next):
   # except Exception as e:
   #     raise HTTPException(status_code=403, detail=f"Invalid authentication token: {str(e)}")
 
-  return await call_next(request)
+  # return await call_next(request)
 
 # @app.get("/demo_auth", response_class=HTMLResponse, tags=["Usage"])
 # async def get_demo_auth():
