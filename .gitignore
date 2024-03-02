@@ -5,7 +5,7 @@ venv/
 .env
 
 app/main/data/*
-**/__pycache__/*
+**/__pycache__/
 *.pyc
 surv.log
 data/*

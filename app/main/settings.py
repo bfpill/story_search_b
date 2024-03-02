@@ -13,12 +13,13 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-  secret_key: str = "SECRET_KEY NOT SET"
-  openai_api_key: str = "OPENAI_API_KEY NOT SET"
-  email_pass: str = "EMAIL_PASS NOT SET"
-  email_user: str = "EMAIL_USER NOT SET"
-  firebase_credentials_base64: str = "FIREBASE CRED NOT SET"
-  master_password: str = "MASTER PASS NOT SET"
+  secret_key: str = os.environ.get("SECRET_KEY")
+  openai_api_key: str = os.environ.get("OPENAI_API_KEY")
+  email_pass: str = os.environ.get("EMAIL_PASS")
+  email_user: str = os.environ.get("EMAIL_USER")
+  firebase_credentials_base64: str = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
+  master_password: str = os.environ.get("MASTER_PASSWORD")
+  firebase_database_url: str = os.environ.get("FIREBASE_DATABASE_URL")
 
   production: bool = False
   logger_file: str = 'surv.log'
@@ -36,7 +37,9 @@ firebase_credentials_json = base64.b64decode(settings.firebase_credentials_base6
 firebase_credentials = json.loads(firebase_credentials_json)
 
 cred = credentials.Certificate(firebase_credentials)
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {
+  'databaseURL': settings.firebase_database_url
+})
 
 # def getFireabseApp():
 #   return firebase_
