@@ -42,14 +42,13 @@ fastapi_url = 'http://localhost:8000'
 # print(response_get_book.json())
 
 
-# ## Create a new user
-# user = {
-#     "username": "John Doe",
-#     "email": "random@gmail.com",
-#     }
+## Create a new user
+user = {
+    "email": "random@gmail.com",
+    }
 
-# response_create_user = requests.post(fastapi_url + f'/api/create_user/{1234321}', json=user)
-# print(response_create_user.json())
+response_create_user = requests.post(fastapi_url + f'/api/create_user/{1234321}', json=user)
+print(response_create_user.json())
 
 
 # ### Get user id by email

@@ -33,4 +33,3 @@ class GenerateBackgroundImageReq(GenerateBookRequest):
 
 class User(BaseModel):
   email: str
-  username: str

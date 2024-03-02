@@ -66,7 +66,7 @@ def create_user(user_id: int, user: User):
       raise HTTPException(status_code=400, detail="Email already exists")
     
     # create new user with user_id as key and email as value
-    user_id_ref.set({"email": user.email, "username": user.username})
+    user_id_ref.set({"email": user.email})
 
     return True
   except Exception as e:
