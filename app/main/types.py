@@ -25,3 +25,7 @@ class Page(BaseModel):
 class BookData(BaseModel):
   title: str
   pages: List[Page]
+  
+class GenerateBackgroundImageReq(GenerateBookRequest): 
+  color: str
+

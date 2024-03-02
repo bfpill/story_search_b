@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from logging import getLogger
 from app.logconfig import setup_rich_logger
-from app.main import generator_routes, routes
+from app.main import generator_routes, image_routes, routes
 from app.main.settings import Settings, settings
 from dotenv import load_dotenv
 
@@ -50,6 +50,7 @@ NO_AUTH_NEEDED = [
 
 app.include_router(routes.router)
 app.include_router(generator_routes.router)
+app.include_router(image_routes.router)
 settings = Settings()
 
 # user_info = request.state.user
