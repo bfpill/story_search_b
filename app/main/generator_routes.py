@@ -14,6 +14,7 @@ from app.main.image_storage_handlers import store_image
 
 from app.main.types import *
 from app.main.data_handlers import *
+from app.main.utils import get_random_pastel_color
 from app.main.vdb_handlers import query_by_search, vdb_store_image
 
 router = APIRouter()
@@ -54,7 +55,7 @@ def generate_book_json(query):
     represents a page of the story, and "text" contains the content of each section.
     Include fictional images by specifying their hypothetical title,
     but ensure they relate to the content of the story. 
-    The background image should be the same for pairs of pages, and just a simple word or two. 
+    The background image covers two pages. It should be relavant to the text on the 2 pages, and just a simple 2-3 words. 
     
     {str(json_structure)}
     Add more pages as needed, following the pattern above.
@@ -74,6 +75,7 @@ def generate_book_json(query):
   
   book_json = completion.choices[0].message.content
   book = json.loads(book_json)
+  book["color"] = get_random_pastel_color()
   print(book)
   
   print("finished book")
@@ -95,7 +97,7 @@ async def generate_book_request(req: GenerateBookRequest):
       left_image_url, right_image_url = get_cached_backgrounds(page["background_image"])
 
       if not left_image_url and not right_image_url: 
-        image_url = generate_background_image(page["background_image"], "blue")
+        image_url = generate_background_image(page["background_image"], book_json["color"])
         left_image_data, right_image_data = split_image(image_url)
 
         left_id, right_id = str(uuid4()), str(uuid4())
@@ -131,8 +133,23 @@ def split_image(url):
     width, height = original_image.size
     mid = width // 2
 
-    left_half = original_image.crop((0, 0, mid, height))
-    right_half = original_image.crop((mid, 0, width, height))
+    # New dimensions based on 8:6 ratio
+    target_width = (height * 8) // 6
+
+    if target_width > width:
+        target_width = width
+        target_height = (target_width * 6) // 8
+    else:
+        target_height = height
+
+    left_edge = (width - target_width) // 2
+    top_edge = (height - target_height) // 2
+
+    cropped_image = original_image.crop((left_edge, top_edge, left_edge + target_width, top_edge + target_height))
+
+    mid_point = target_width // 2
+    left_half = cropped_image.crop((0, 0, mid_point, height))
+    right_half = cropped_image.crop((mid_point, 0, target_width, height))
 
     left_bytes = BytesIO()
     right_bytes = BytesIO()

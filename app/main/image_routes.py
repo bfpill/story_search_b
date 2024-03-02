@@ -11,8 +11,8 @@ logger = getLogger()
 
 
 def generate_background_image(query, color):
-  prompt = f"Generate a mostly {color} watercolor pastel childrens book background image, landscape, low detail, \n"
-  prompt += f"{query}"
+  prompt = f"Generate a mostly {color} watercolor pastel childrens book background image, landscape, low detail, \n."
+  prompt += f"The picture should be of a {query}"
 
   print("genning image, ", prompt)
   response = client.images.generate(
