@@ -8,20 +8,20 @@ router = APIRouter()
 logger = getLogger()
 settings = Settings()
 
-def does_user_exist(user_id: str):
-  user_ref = db.reference(f'/users/{user_id}')
+def does_user_exist(email: str):
+  user_ref = db.reference(f'/users/{email}')
   user_data = user_ref.get()
   if not user_data:
     return False
   return True
 
-@router.get('/api/get_book/{user_id}/{book_id}', tags=["Book", "User"])
-def get_book(user_id: int, book_id: int):
+@router.get('/api/get_book/{email}/{book_id}', tags=["Book", "User"])
+def get_book(email: str, book_id: int):
   try:
-    if not does_user_exist(user_id):
+    if not does_user_exist(email):
       raise HTTPException(status_code=404, detail="User not found")
 
-    user_books_ref = db.reference(f'/users/{user_id}/books')
+    user_books_ref = db.reference(f'/users/{email}/books')
     user_books = user_books_ref.get()
     
     if user_books:
@@ -39,13 +39,13 @@ def get_book(user_id: int, book_id: int):
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router.post('/api/set_book/{user_id}/{book_id}', tags=["Book", "User"])
-def set_book(user_id: str, book_id: str, book: BookData):
+@router.post('/api/set_book/{email}/{book_id}', tags=["Book", "User"])
+def set_book(email: str, book_id: str, book: BookData):
   try:
-    if not does_user_exist(user_id):
+    if not does_user_exist(email):
       raise HTTPException(status_code=404, detail="User not found")
     
-    books_ref = db.reference(f'/users/{user_id}/books')
+    books_ref = db.reference(f'/users/{email}/books')
     books_ref.child(book_id).set(book.model_dump())
 
     # Add books to correct category in books 
@@ -61,36 +61,15 @@ def set_book(user_id: str, book_id: str, book: BookData):
 
 
 #create a new user
-@router.post('/api/create_user/{user_id}', tags=["User"])
-def create_user(user_id: int, user: User):
+@router.post('/api/create_user/{email}', tags=["User"])
+def create_user(email: str):
   try:
-    # check if email already exists in /accounts/emails where email is key and user_id is value
-    user_id_ref = db.reference(f'/accounts/id/{user_id}')
-    user_data = user_id_ref.get()
-    if user_data:
-      raise HTTPException(status_code=400, detail="Email already exists")
-    
-    # create new user with user_id as key and email as value
-    user_id_ref.set({"email": user.email})
+    email_id_ref = db.reference(f'/users/{email}')
+    email_id_ref.set({"og_email": email})
 
     return True
   except Exception as e:
     logger.error(f"Error creating user: {e}")
-    raise HTTPException(detail=str(e),
-               status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.get('/api/get_user/{user_id}', tags=["User"])
-def get_user_id(user_id: int):
-  try:
-    acc_ref = db.reference(f'/accounts/id/{user_id}')
-    account = acc_ref.get()
-    if account:
-      return {"user_id": account}
-    else:
-      raise HTTPException(status_code=404, detail="User not found")
-  except Exception as e:
-    logger.error(f"Error retrieving account: {e}")
     raise HTTPException(detail=str(e),
                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
   
@@ -106,5 +85,20 @@ def get_all_books():
       raise HTTPException(status_code=404, detail="Books not found")
   except Exception as e:
     logger.error(f"Error retrieving books: {e}")
+    raise HTTPException(detail=str(e),
+               status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  
+  
+@router.get('/api/get_all_user_books/{email}', tags=["Book"])
+def get_all_user_books(email: str):
+  try:
+    user_books_ref = db.reference(f'/users/{email}/books')
+    user_books = user_books_ref.get()
+    if user_books:
+      return {"books": user_books}
+    else:
+      raise HTTPException(status_code=404, detail="Books not found")
+  except Exception as e:
+    logger.error(f"Error retrieving user books: {e}")
     raise HTTPException(detail=str(e),
                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

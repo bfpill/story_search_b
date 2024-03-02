@@ -3,9 +3,18 @@ import requests
 # Replace 'your_fastapi_server_url' with the actual URL of your FastAPI server
 fastapi_url = 'http://localhost:8000'
 
+# ### Create user 
+og_email = 'create@gmail.com'
+def encode_email(email):
+    return email.replace('.', ',')
 
-# ## Push sample book data to firebase
-# user_id = '1010'
+
+# response_create_user = requests.post(fastapi_url + f'/api/create_user/{encode_email(og_email)}', json={"og_email": og_email})
+# print(response_create_user.json())
+
+
+
+# # ## Push sample book data to firebase
 # book_id = '104'
 # book_data = {
 #     "title": "Sample Book random Title 1",
@@ -30,34 +39,22 @@ fastapi_url = 'http://localhost:8000'
 #     ]
 # }
 
-# response_push_book = requests.post(fastapi_url + f"/api/set_book/{user_id}/{book_id}", json=book_data)
+# response_push_book = requests.post(fastapi_url + f"/api/set_book/{encode_email(og_email)}/{book_id}", json=book_data)
 # print(response_push_book.json())
 
 
 
 # ### Get book by user id and book id 
-# user_id = 1010
-# book_id = 101
-
-# response_get_book = requests.get(fastapi_url + f'/api/get_book/{user_id}/{book_id}')
+# book_id = 104
+# print(fastapi_url + f'/api/get_book/{encode_email(og_email)}/{book_id}')
+# response_get_book = requests.get(fastapi_url + f'/api/get_book/{encode_email(og_email)}/{book_id}')
 # print(response_get_book.json())
-
-
-# ## Create a new user
-# user = {
-#     "email": "random@gmail.com",
-#     }
-
-# response_create_user = requests.post(fastapi_url + f'/api/create_user/{1234321}', json=user)
-# print(response_create_user.json())
-
-
-# ### Get user id by email
-# email = "random@gmail.com"
-# response_get_user_id = requests.get(fastapi_url + f'/api/get_user_id/{email}')
-# print(response_get_user_id.json())
 
 
 # ### Get all books
 # response_get_all_books = requests.get(fastapi_url + f'/api/get_all_books')
 # print(response_get_all_books.json())
+
+# ## get all books for user
+# response_get_user_books = requests.get(fastapi_url + f'/api/get_all_user_books/{encode_email(og_email)}')
+# print(response_get_user_books.json())
