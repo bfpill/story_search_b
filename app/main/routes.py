@@ -19,7 +19,7 @@ def get_book(email: str, book_id: str):
   print(email, book_id)
 
   try:
-    user_books_doc_ref = db.collection(f'users/max@v3rv,com/books').document(str(book_id))
+    user_books_doc_ref = db.collection(f'users/{email}/books').document(str(book_id))
     print(user_books_doc_ref)
    
     book_doc = user_books_doc_ref.get()
