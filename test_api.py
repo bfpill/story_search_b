@@ -8,7 +8,7 @@ fastapi_url = 'http://localhost:8000'
 # user_id = '1010'
 # book_id = '101'
 # book_data = {
-#     "title": "Sample Book random Title",
+#     "title": "Sample Book random Title 1",
 #     "pages": [
 #         {
 #             "pageNum": 1,
@@ -40,3 +40,21 @@ fastapi_url = 'http://localhost:8000'
 
 # response_get_book = requests.get(fastapi_url + f'/api/get_book/{user_id}/{book_id}')
 # print(response_get_book.json())
+
+
+# ## Create a new user
+# user = {
+#     "username": "John Doe",
+#     "email": "random@gmail.com",
+#     }
+
+# response_create_user = requests.post(fastapi_url + f'/api/create_user/{1234321}', json=user)
+# print(response_create_user.json())
+
+
+# ### Get user id by email
+# email = "random@gmail.com"
+# response_get_user_id = requests.get(fastapi_url + f'/api/get_user_id/{email}')
+# print(response_get_user_id.json())
+
+
