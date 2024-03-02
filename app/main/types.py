@@ -16,27 +16,12 @@ class CreateUserRequest(BaseModel):
   email: str
 
 
-class ImagePosition(BaseModel):
-  x: int
-  y: int
-
-
-class Image(BaseModel):
-  src: str
-  position: Optional[ImagePosition]
-
-
 class Page(BaseModel):
   pageNum: int
   text: str
-  images: List[Image]
+  images: List[str]
 
 
-class Book(BaseModel):
+class BookData(BaseModel):
   title: str
   pages: List[Page]
-
-
-class SaveBookRequest(BaseModel):
-  user_id: str
-  book: Book
