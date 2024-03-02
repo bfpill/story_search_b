@@ -15,28 +15,21 @@ settings = Settings()
 @router.get('/api/get_book/{email}/{book_id}', tags=["Book", "User"])
 def get_book(email: str, book_id: int):
 
-  email = email.replace('.', ',')
-  
-  try:
-    # if not does_user_exist(email):
-    #   raise HTTPException(status_code=404, detail="User not found")
+  encoded_email = email.replace('.', ',')
 
-    user_books_ref = db.reference(f'/users/{email}/books')
-    user_books = user_books_ref.get()
-    
-    if user_books:
-      query = user_books_ref.order_by_key().equal_to(str(book_id))
-      book = query.get()
-      if book:
-        return {"success": True, "book": book}
-      else:
-        raise HTTPException(status_code=404, detail="Book not found")
+  try:
+    user_books_doc_ref = db.collection(f'users/{encoded_email}/books').document(book_id)
+    book_doc = user_books_doc_ref.get()
+
+    if book_doc.exists:
+        book_data = book_doc.to_dict()
+        return book_data
     else:
-      raise HTTPException(status_code=404, detail="Books not found")
-  
+        raise HTTPException(status_code=404, detail="Book not found")
+
   except Exception as e:
-    logger.error(f"Error retrieving user books: {e}")
-    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+      logger.error(f"Error retrieving user books: {e}")
+      raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.post('/api/set_book/{email}/{book_id}', tags=["Book", "User"])
 def set_book(req: SetBookReq, email: str, book_id: str):
@@ -72,7 +65,7 @@ def create_user(email: str):
   email = email.replace(".", ",")
 
   try:
-    email_id_ref = db.reference(f'/users/{email}')
+    email_id_ref = db.document(f'users/{email}')
     email_id_ref.set({"og_email": email})
 
     return True
@@ -100,13 +93,17 @@ def get_all_books():
 @router.get('/api/get_all_user_books/{email}', tags=["Book"])
 def get_all_user_books(email: str):
   try:
-    user_books_ref = db.reference(f'/users/{email}/books')
-    user_books = user_books_ref.get()
+    encoded_email = email.replace('.', ',')
+    user_books_ref = db.collection(f'users/{encoded_email}/books')
+    
+    user_books_stream = user_books_ref.stream()
+    
+    user_books = [doc.to_dict() for doc in user_books_stream]
+    
     if user_books:
-      return {"books": user_books}
+        return user_books
     else:
-      raise HTTPException(status_code=404, detail="Books not found")
+        raise HTTPException(status_code=404, detail="Books not found")
   except Exception as e:
     logger.error(f"Error retrieving user books: {e}")
-    raise HTTPException(detail=str(e),
-               status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    raise HTTPException(status_code=500, detail=str(e))
