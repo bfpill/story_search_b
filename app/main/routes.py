@@ -2,24 +2,24 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header
 from logging import getLogger
 from app.main.settings import Settings
 from app.main.types import *
-from firebase_admin import db
+
+from firebase_admin import firestore
+db = firestore.client()
 
 router = APIRouter()
 logger = getLogger()
 settings = Settings()
 
-def does_user_exist(email: str):
-  user_ref = db.reference(f'/users/{email}')
-  user_data = user_ref.get()
-  if not user_data:
-    return False
-  return True
+# def does_user_exist(email: str):
 
 @router.get('/api/get_book/{email}/{book_id}', tags=["Book", "User"])
 def get_book(email: str, book_id: int):
+
+  email = email.replace('.', ',')
+  
   try:
-    if not does_user_exist(email):
-      raise HTTPException(status_code=404, detail="User not found")
+    # if not does_user_exist(email):
+    #   raise HTTPException(status_code=404, detail="User not found")
 
     user_books_ref = db.reference(f'/users/{email}/books')
     user_books = user_books_ref.get()
@@ -38,19 +38,23 @@ def get_book(email: str, book_id: int):
     logger.error(f"Error retrieving user books: {e}")
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-
 @router.post('/api/set_book/{email}/{book_id}', tags=["Book", "User"])
-def set_book(email: str, book_id: str, book: BookData):
-  try:
-    if not does_user_exist(email):
-      raise HTTPException(status_code=404, detail="User not found")
-    
-    books_ref = db.reference(f'/users/{email}/books')
-    books_ref.child(book_id).set(book.model_dump())
+def set_book(req: SetBookReq, email: str, book_id: str):
+  
+  email = email.replace('.', ',')
 
-    # Add books to correct category in books 
-    books_ref = db.reference(f'/books/{book.category}')
-    books_ref.child(book_id).set(book.model_dump())
+  print(email, req.book)
+
+  try:
+    # if not does_user_exist(email):
+    #   raise HTTPException(status_code=404, detail="User not found")
+    
+    user_books_doc_ref = db.collection(f'users/{email}/books').document(book_id)
+    user_books_doc_ref.set(req.book)
+
+    if req.book["category"]:
+      category_books_doc_ref = db.collection(f'books/{req.book["category"]}/{book_id}').document(book_id)
+      category_books_doc_ref.set(req.book)
     
     print("WROTE TO BOOK USER")
     return True
@@ -64,6 +68,9 @@ def set_book(email: str, book_id: str, book: BookData):
 #create a new user
 @router.post('/api/create_user/{email}', tags=["User"])
 def create_user(email: str):
+
+  email = email.replace(".", ",")
+
   try:
     email_id_ref = db.reference(f'/users/{email}')
     email_id_ref.set({"og_email": email})

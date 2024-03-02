@@ -55,6 +55,7 @@ async def generate_search_options(req: GenerateSearchOptionsReq):
 async def generate_book_json(query): 
   json_structure = {
         "title": "Funny Title",
+        "category": "ie Science, Animals, Vehicles, etc",
         "pages": [
             {
                 "pageNum": 1,

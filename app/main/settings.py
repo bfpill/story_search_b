@@ -19,7 +19,6 @@ class Settings(BaseSettings):
   email_pass: str = "EMAIL_PASS NOT SET"
   email_user: str = "EMAIL_USER NOT SET"
   firebase_credentials_base64: str = "FIREBASE CRED NOT SET"
-  firebase_database_url: str = "FIREBASE_DATABASE_URL"
   master_password: str = "MASTER PASS NOT SET"
   pinecone_api_key: str = "PINECONE_API_KEY NOT SET" 
 
@@ -40,8 +39,7 @@ firebase_credentials_json = base64.b64decode(settings.firebase_credentials_base6
 firebase_credentials = json.loads(firebase_credentials_json)
 
 cred = credentials.Certificate(firebase_credentials)
-firebase_admin.initialize_app(cred,  {'storageBucket': 'baggetters-38a7c.appspot.com', 
-                                      'databaseURL': settings.firebase_database_url})
+firebase_admin.initialize_app(cred,  {'storageBucket': 'storysearch2.appspot.com'})
 
 # def getFireabseApp():
 #   return firebase_

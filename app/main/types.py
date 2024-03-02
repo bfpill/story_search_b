@@ -4,7 +4,9 @@ from uuid import uuid4
 
 class Base(BaseModel):
   empty: str
-  
+
+class SetBookReq(BaseModel):
+  book: Dict
   
 class GenerateBookRequest(BaseModel):
   search_query: str
