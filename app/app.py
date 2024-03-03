@@ -20,17 +20,12 @@ def get_app() -> FastAPI:
   setup_rich_logger()
   return app
 
-app = get_app()
-
 logger = getLogger()
 
+app = get_app()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 app.include_router(routes.router)
