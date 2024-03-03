@@ -2,12 +2,12 @@ from logging import getLogger
 from fastapi import APIRouter
 from openai import AsyncOpenAI, OpenAI
 import asyncio
-from app.main import settings
+from app.main.settings import getOpenai
 
 
 from app.main.types import GenerateBackgroundImageReq
 router = APIRouter()
-client = AsyncOpenAI()
+client = getOpenai()
 logger = getLogger()
 
 

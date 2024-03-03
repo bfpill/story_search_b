@@ -5,13 +5,14 @@ import os
 import uuid
 from openai import AsyncOpenAI, OpenAI
 from pinecone import ServerlessSpec
+from app.main.settings import getOpenai
 from app.main.types import *
 
 from firebase_admin import firestore
 
 db = firestore.client()
 logger = getLogger()
-client = AsyncOpenAI()
+client = getOpenai()
 
 response_index_dims = 1536
 form_index_dims= 1

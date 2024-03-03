@@ -6,8 +6,9 @@ from openai import AsyncOpenAI, OpenAI
 from app.main import settings
 from app.main.settings import getPc
 from pinecone import ServerlessSpec
+from app.main.settings import getOpenai
 
-client = AsyncOpenAI()
+client = getOpenai()
 
 backgrounds_index_name = "backgrounds"
 story_index_name = "books"
@@ -37,7 +38,7 @@ async def vdb_store_story(query, text):
   )
 
   print("resd", res)
-  return True
+  return
   
 # this will not work if we call immediately after writing to vector, pinecone has a significant sync time
 def get_embedding(index_name: str, emb_id: str, namespace: str = ""): 

@@ -3,7 +3,7 @@ from typing import Union
 from fastapi import APIRouter, status, HTTPException 
 from openai import AsyncOpenAI, OpenAI
 from logging import getLogger
-from app.main import settings
+from app.main.settings import getOpenai
 from app.main.image_routes import generate_background_image 
 import asyncio
 from PIL import Image
@@ -19,7 +19,7 @@ from app.main.utils import get_random_pastel_color
 from app.main.vdb_handlers import query_by_search, query_by_search_story, vdb_store_image, vdb_store_story
 
 router = APIRouter()
-client = AsyncOpenAI()
+client = getOpenai()
 logger = getLogger()
 
 @router.post('/search', tags=["book"])
