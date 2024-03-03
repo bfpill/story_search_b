@@ -10,6 +10,8 @@ from pinecone import ServerlessSpec
 client = AsyncOpenAI()
 
 backgrounds_index_name = "backgrounds"
+story_index_name = "books"
+
 pc = getPc()
 logger = getLogger()
 
@@ -21,11 +23,11 @@ async def vdb_store_image(imageTitle, left_url, right_url):
   print("stored embed")
 
 ### Check function below  
-story_index_name = "backgrounds"
-async def vdb_store_story(query, book_url):
+async def vdb_store_story(query, text):
   vector = await create_vector(query)
+  
   print("got vector")
-  store_embed_story(story_index_name, str(uuid4()), book_url=book_url, vector=vector)
+  store_embed_story(story_index_name, str(uuid4()), text, vector=vector)
   
 # this will not work if we call immediately after writing to vector, pinecone has a significant sync time
 def get_embedding(index_name: str, emb_id: str, namespace: str = ""): 
@@ -50,7 +52,6 @@ async def query_by_search(query: str):
     include_metadata=True
   )
 
-### Check function below 
 async def query_by_search_story(query: str):
   query_vector = await create_vector(query)
   index = pc.Index(story_index_name)
@@ -91,12 +92,13 @@ def store_embed(index_name: str, vector_id: str, left_url: str, right_url: str, 
   print("upserted vector")
 
 ### Check function below 
-def store_embed_story(index_name: str, vector_id: str, book_url: str, vector: List): 
+def store_embed_story(index_name: str, vector_id: str, text: str, vector: List): 
   if index_name not in pc.list_indexes().names():
-    create_index(index_name=index_name, dims="1536")
+    create_index(index_name="books", dims="1536")
 
-  index = pc.Index(index_name)
-  vec = [{"id": vector_id, "values": vector, "metadata": {"book_id": book_url }}]
+  print(vector)
+  index = pc.Index("books")
+  vec = [{"id": vector_id, "values": vector, "metadata": {"story": text}}]
   index.upsert(
     vectors=vec
   )

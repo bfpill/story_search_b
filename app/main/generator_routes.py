@@ -11,7 +11,7 @@ from uuid import uuid4
 
 import requests
 from io import BytesIO
-from app.main.image_storage_handlers import store_image, store_story
+from app.main.image_storage_handlers import store_image 
 
 from app.main.types import *
 from app.main.data_handlers import *
@@ -122,16 +122,13 @@ async def generate_book_request(req: GenerateBookRequest):
   print("generating a book")
   book_json = await generate_book_json(req.search_query)
 
-  # book_url = await get_cached_story(req.search_query)
-  # if not book_url: 
-  #   book_json = await generate_book_json(req.search_query)
-  #   book_url = store_story(req.search_query, book_json)
-  #   await vdb_store_story(req.search_query, book_url)
+  book_url = await get_cached_story(req.search_query)
+  if not book_url: 
+    book_json = await generate_book_json(req.search_query)
+    text = " ".join([page["text"] for page in book_json["pages"]])
+    
+    await vdb_store_story(req.search_query, text)
 
-  # # get book json from firebase
-  # book_json = await get_cached_story(req.search_query)
-
-  # Add something here to get the books general color theme
   images = []
   for i, page in enumerate(book_json["pages"]): 
     if i % 2 == 0: 
@@ -176,15 +173,17 @@ async def get_cached_backgrounds(query):
 async def get_cached_story(query):
   emb = await query_by_search_story(query)
 
+  if not emb["matches"]:
+    return 
+  
   print("EMB", emb["matches"][0]['score'])
 
   match = emb["matches"][0]
-  if match and match["score"] > 0.81:
+  if match and "score" in match and match["score"] > 0.81:
     if "metadata" in match:
       print("GOT EXISTING STORY")
-      return match["metadata"]["story_url"]
+      return match["metadata"]["story"]
 
-  return None
 
 
 def split_image(url):

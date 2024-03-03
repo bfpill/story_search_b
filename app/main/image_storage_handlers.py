@@ -20,20 +20,3 @@ def store_image(image_id, data):
 
     print("Your file URL:", blob.public_url)
     return blob.public_url
-
-### Check function below 
-def store_story(book_id, data):
-    data_blob = BytesIO(data)
-    data_blob.seek(0)
-
-    bucket = storage.bucket()
-
-    blob = bucket.blob(str(book_id))
-    
-    # update data (json) to firebase
-    blob.upload_from_file(data_blob, content_type='application/json')
-
-    blob.make_public()
-
-    print("Your file URL:", blob.public_url)
-    return blob.public_url
