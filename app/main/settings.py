@@ -19,7 +19,7 @@ class Settings(BaseSettings):
   email_user: str = "EMAIL_USER NOT SET"
   master_password: str = "MASTER PASS NOT SET"
   pinecone_api_key: str = "PINECONE_API_KEY NOT SET" 
-  firebase_credentials: str = "FIREBASE_CREDENTIALS NOT SET"
+  firebase_credentials_base64: str = "FIREBASE CRED NOT SET"
 
   production: bool = False
   logger_file: str = 'surv.log'
@@ -33,9 +33,14 @@ settings = Settings()
 client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 pc_key = settings.pinecone_api_key
-print(settings.firebase_credentials)
-cred = credentials.Certificate(json.loads(str(settings.firebase_credentials)))
-firebase_admin.initialize_app(cred,  {'storageBucket': 'storysearch2.appspot.com'})
+
+cred = credentials.Certificate("app/firebase_config/firebase_cred.json")
+firebase_admin.initialize_app(cred)
+
+# firebase_credentials = json.loads(firebase_credentials_json)
+
+# cred = credentials.Certificate(firebase_credentials)
+# firebase_admin.initialize_app(cred,  {'storageBucket': 'storysearch2.appspot.com'})
 
 # def getFireabseApp():
 #   return firebase_
