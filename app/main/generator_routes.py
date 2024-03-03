@@ -22,7 +22,7 @@ router = APIRouter()
 client = getOpenai()
 logger = getLogger()
 
-@router.post('/search', tags=["book"])
+@router.put('/search', tags=["book"])
 async def generate_search_options(req: GenerateSearchOptionsReq): 
   json_structure = {"titles": [
     "Possible Title 1",
