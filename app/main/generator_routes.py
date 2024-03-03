@@ -52,7 +52,7 @@ async def generate_search_options(req: GenerateSearchOptionsReq):
   
   return titles 
 
-async def generate_book_json(query): 
+async def generate_book_json(query, title): 
   json_structure = {
         "title": "Funny Title",
         "category": "ie Science, Animals, Vehicles, etc",
@@ -80,6 +80,7 @@ async def generate_book_json(query):
  
   prompt = f'''
     Create a short story based on factual information about "{query}".
+    The title of the story is "{title}"
     The story should be engaging, with fictional 
     characters and a narrative that weaves in the factual information seamlessly.
 
@@ -120,12 +121,11 @@ async def generate_book_json(query):
 @router.post('/book', tags=["book"])
 async def generate_book_request(req: GenerateBookRequest):
   print("generating a book")
-  book_json = await generate_book_json(req.search_query)
 
   book_url = await get_cached_story(req.search_query)
   print("BOOK_URL", book_url)
   if not book_url: 
-    book_json = await generate_book_json(req.search_query)
+    book_json = await generate_book_json(req.search_query, req.title)
     text = " ".join([page["text"] for page in book_json["pages"]])
     
     await vdb_store_story(req.search_query, text)

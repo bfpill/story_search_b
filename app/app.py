@@ -24,19 +24,13 @@ app = get_app()
 
 logger = getLogger()
 
-origins = [
-  "http://localhost:*",
-  "https://localhost:*",
-  "https://unihack-2024-story-search.vercel.app:*",
-]
-
 app.add_middleware(
-  CORSMiddleware,
-  allow_origins=["*"],
-  allow_credentials=True,
-  allow_methods=["*"],
-  allow_headers=["*"],
-  expose_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(routes.router)

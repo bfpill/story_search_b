@@ -11,6 +11,7 @@ class SetBookReq(BaseModel):
 class GenerateBookRequest(BaseModel):
   search_query: str
   user_id: str
+  title: str
   
 class GenerateSearchOptionsReq(BaseModel):
   search_query: str

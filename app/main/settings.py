@@ -35,7 +35,7 @@ client = AsyncOpenAI(api_key=settings.openai_api_key)
 pc_key = settings.pinecone_api_key
 
 cred = credentials.Certificate("app/firebase_config/firebase_cred.json")
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {'storageBucket': 'storysearch2.appspot.com'})
 
 # firebase_credentials = json.loads(firebase_credentials_json)
 
