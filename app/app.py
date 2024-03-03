@@ -27,6 +27,7 @@ logger = getLogger()
 origins = [
   "http://localhost:*",
   "https://localhost:*",
+  "https://unihack-2024-story-search.vercel.app:*",
 ]
 
 app.add_middleware(
@@ -37,12 +38,6 @@ app.add_middleware(
   allow_headers=["*"],
   expose_headers=["*"],
 )
-
-NO_AUTH_NEEDED = [
-    "/api/waitlist",        
-    "/usage",  
-    "/demo_auth"
-]
 
 app.include_router(routes.router)
 app.include_router(generator_routes.router)
