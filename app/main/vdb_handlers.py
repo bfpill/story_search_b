@@ -19,6 +19,13 @@ async def vdb_store_image(imageTitle, left_url, right_url):
 
   store_embed(backgrounds_index_name, str(uuid4()), left_url=left_url, right_url=right_url, vector=vector)
   print("stored embed")
+
+### Check function below  
+story_index_name = "backgrounds"
+async def vdb_store_story(query, book_url):
+  vector = await create_vector(query)
+  print("got vector")
+  store_embed_story(story_index_name, str(uuid4()), book_url=book_url, vector=vector)
   
 # this will not work if we call immediately after writing to vector, pinecone has a significant sync time
 def get_embedding(index_name: str, emb_id: str, namespace: str = ""): 
@@ -33,6 +40,20 @@ def get_embedding(index_name: str, emb_id: str, namespace: str = ""):
 async def query_by_search(query: str): 
   query_vector = await create_vector(query)
   index = pc.Index(backgrounds_index_name)
+  
+  print("querying embedding") 
+
+  return index.query(
+    vector=query_vector,
+    top_k=1,
+    include_values=True, 
+    include_metadata=True
+  )
+
+### Check function below 
+async def query_by_search_story(query: str):
+  query_vector = await create_vector(query)
+  index = pc.Index(story_index_name)
   
   print("querying embedding") 
 
@@ -68,6 +89,19 @@ def store_embed(index_name: str, vector_id: str, left_url: str, right_url: str, 
   )
   
   print("upserted vector")
+
+### Check function below 
+def store_embed_story(index_name: str, vector_id: str, book_url: str, vector: List): 
+  if index_name not in pc.list_indexes().names():
+    create_index(index_name=index_name, dims="1536")
+
+  index = pc.Index(index_name)
+  vec = [{"id": vector_id, "values": vector, "metadata": {"book_id": book_url }}]
+  index.upsert(
+    vectors=vec
+  )
+  
+  print("upserted embed vector")
   
 def create_index(index_name: str, dims: int): 
   try:

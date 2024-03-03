@@ -3,13 +3,12 @@ import requests
 # Replace 'your_fastapi_server_url' with the actual URL of your FastAPI server
 fastapi_url = 'http://localhost:8000'
 
-# ### Create user 
-og_email = 'create@gmail.com'
-def encode_email(email):
-    return email.replace('.', ',')
+# # ### Create user 
+# og_email = 'davidb@gmail.com'
+# def encode_email(email):
+#     return email.replace('.', ',')
 
-
-# response_create_user = requests.post(fastapi_url + f'/api/create_user/{encode_email(og_email)}', json={"og_email": og_email})
+# response_create_user = requests.post(fastapi_url + f'/api/create_user/{encode_email(email)}', json={"email": email})
 # print(response_create_user.json())
 
 
@@ -51,10 +50,11 @@ def encode_email(email):
 # print(response_get_book.json())
 
 
-# ### Get all books
-# response_get_all_books = requests.get(fastapi_url + f'/api/get_all_books')
+# # ### Get all books
+# response_get_all_books = requests.get(fastapi_url + '/api/get_all_books')
 # print(response_get_all_books.json())
 
+
 # ## get all books for user
-# response_get_user_books = requests.get(fastapi_url + f'/api/get_all_user_books/{encode_email(og_email)}')
+# response_get_user_books = requests.get(fastapi_url + f'/api/user_books/max@v3rv,com')
 # print(response_get_user_books.json())

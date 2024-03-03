@@ -11,12 +11,12 @@ from uuid import uuid4
 
 import requests
 from io import BytesIO
-from app.main.image_storage_handlers import store_image
+from app.main.image_storage_handlers import store_image, store_story
 
 from app.main.types import *
 from app.main.data_handlers import *
 from app.main.utils import get_random_pastel_color
-from app.main.vdb_handlers import query_by_search, vdb_store_image
+from app.main.vdb_handlers import query_by_search, query_by_search_story, vdb_store_image, vdb_store_story
 
 router = APIRouter()
 client = AsyncOpenAI()
@@ -122,6 +122,15 @@ async def generate_book_request(req: GenerateBookRequest):
   print("generating a book")
   book_json = await generate_book_json(req.search_query)
 
+  # book_url = await get_cached_story(req.search_query)
+  # if not book_url: 
+  #   book_json = await generate_book_json(req.search_query)
+  #   book_url = store_story(req.search_query, book_json)
+  #   await vdb_store_story(req.search_query, book_url)
+
+  # # get book json from firebase
+  # book_json = await get_cached_story(req.search_query)
+
   # Add something here to get the books general color theme
   images = []
   for i, page in enumerate(book_json["pages"]): 
@@ -163,6 +172,19 @@ async def get_cached_backgrounds(query):
       return left_url, right_url
 
   return None, None
+
+async def get_cached_story(query):
+  emb = await query_by_search_story(query)
+
+  print("EMB", emb["matches"][0]['score'])
+
+  match = emb["matches"][0]
+  if match and match["score"] > 0.81:
+    if "metadata" in match:
+      print("GOT EXISTING STORY")
+      return match["metadata"]["story_url"]
+
+  return None
 
 
 def split_image(url):
