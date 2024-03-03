@@ -88,12 +88,12 @@ async def generate_book_json(query, title):
     represents a page of the story, and "text" contains the content of each section.
     Include fictional images by specifying their hypothetical title,
     but ensure they relate to the content of the story. 
-    The background image covers two pages. It should be relavant to the text on the 2 pages, and just a simple 2-3 words. 
+    The background image covers two pages. It should be relavant to the text on the 2 pages, and describe the scene well. 
     
     {str(json_structure)}
     Add more pages as needed, following the pattern above.
     
-    The story should be roughly 40 words total, and 4 pages long. 
+    The story should be roughly 80 words total, and 8 pages long. 
     
     '''
             
@@ -122,13 +122,13 @@ async def generate_book_json(query, title):
 async def generate_book_request(req: GenerateBookRequest):
   print("generating a book")
 
-  book_url = await get_cached_story(req.search_query)
-  print("BOOK_URL", book_url)
-  if not book_url: 
-    book_json = await generate_book_json(req.search_query, req.title)
-    text = " ".join([page["text"] for page in book_json["pages"]])
-    
-    await vdb_store_story(req.search_query, text)
+  book_json = await generate_book_json(req.search_query, req.title)
+  # cached_story = await get_cached_story(req.search_query)
+  # print("BOOK_URL", cached_story)
+  # if not cached_story: 
+  text = " ".join([page["text"] for page in book_json["pages"]])
+  
+  await vdb_store_story(req.search_query, text)
 
   images = []
   for i, page in enumerate(book_json["pages"]): 
@@ -166,7 +166,7 @@ async def get_cached_backgrounds(query):
     return None, None
 
   match = matches[0]
-  if match and match["score"] > 0.81:
+  if match and match["score"] > 0.98:
     print("EMB", emb["matches"][0]['score'])
     if "metadata" in match:
       print("GOT EXISTING IMAGE")
