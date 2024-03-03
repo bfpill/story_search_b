@@ -26,8 +26,18 @@ async def vdb_store_image(imageTitle, left_url, right_url):
 async def vdb_store_story(query, text):
   vector = await create_vector(query)
   
-  print("got vector")
-  store_embed_story(story_index_name, str(uuid4()), text, vector=vector)
+  if "book" not in pc.list_indexes().names():
+    create_index(index_name="books", dims="1536")
+
+  print(vector)
+  index = pc.Index("books")
+  vec = [{"id": str(uuid4()), "values": vector, "metadata": {"story": text}}]
+  res = index.upsert(
+    vectors=vec
+  )
+
+  print("resd", res)
+  return True
   
 # this will not work if we call immediately after writing to vector, pinecone has a significant sync time
 def get_embedding(index_name: str, emb_id: str, namespace: str = ""): 

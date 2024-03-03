@@ -123,6 +123,7 @@ async def generate_book_request(req: GenerateBookRequest):
   book_json = await generate_book_json(req.search_query)
 
   book_url = await get_cached_story(req.search_query)
+  print("BOOK_URL", book_url)
   if not book_url: 
     book_json = await generate_book_json(req.search_query)
     text = " ".join([page["text"] for page in book_json["pages"]])
@@ -159,10 +160,14 @@ async def generate_book_request(req: GenerateBookRequest):
 async def get_cached_backgrounds(query): 
   emb = await query_by_search(query)
 
-  print("EMB", emb["matches"][0]['score'])
+  matches = emb["matches"]
+  
+  if not matches: 
+    return None, None
 
-  match = emb["matches"][0]
+  match = matches[0]
   if match and match["score"] > 0.81:
+    print("EMB", emb["matches"][0]['score'])
     if "metadata" in match:
       print("GOT EXISTING IMAGE")
       left_url, right_url = match["metadata"]["left_id"], match["metadata"]["right_id"]
@@ -173,17 +178,18 @@ async def get_cached_backgrounds(query):
 async def get_cached_story(query):
   emb = await query_by_search_story(query)
 
-  if not emb["matches"]:
-    return 
+  matches = emb["matches"]
   
-  print("EMB", emb["matches"][0]['score'])
+  if not matches: 
+    return
 
-  match = emb["matches"][0]
-  if match and "score" in match and match["score"] > 0.81:
+  match = matches[0]
+  
+  if match and "score" in match and match["score"] > 0.91:
     if "metadata" in match:
+      print("EMB", emb["matches"][0]['score'])
       print("GOT EXISTING STORY")
       return match["metadata"]["story"]
-
 
 
 def split_image(url):

@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings
 from pinecone import Pinecone
 
 import firebase_admin
-from firebase_admin import credentials, auth
+from firebase_admin import credentials
 
 load_dotenv()
 
